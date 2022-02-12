@@ -13,6 +13,7 @@ from scipy.optimize import curve_fit
 lcr_r1=pd.read_csv("C:/Users/Freddie/Data/LCR_Circuit_1ohm.csv")
 lcr_r2=pd.read_csv("C:/Users/Freddie/Data/LCR_Circuit_2ohm.csv") #Reads in the data and assigns to variable LCR_r followed by the resistance of the resistor
 lcr_r3=pd.read_csv("C:/Users/Freddie/Data/LCR_Circuit_3ohm.csv")
+lcr_r1["Amplitude STD"]=lcr_r1["Amplitude STD"].replace([172.7],0.1727)
 print(lcr_r1)
 def resonance(f,N,w,y):
     root=np.sqrt(((f**2)-(w**2))**2+(y*f)**2)    #This is the resonance curve function that will be used for fitting
@@ -38,9 +39,9 @@ def phase_r(f,w,a,d,y,r,R):
 freq_1=lcr_r1["Frequency (Hz)"]*0.001*2*np.pi
 print(freq_1)
 amp_1=lcr_r1["Amplitude (mV)"]*0.001
-amp_1_u=lcr_r1["Amplitude STD"]                     #Assigns each useful column to different variables
+amp_1_u=lcr_r1["Amplitude STD"]*0.1                     #Assigns each useful column to different variables
 phase_1=-lcr_r1["Phase (degrees)"]*((np.pi)/180)   #Degrees is converted to radians
-phase_1_u=lcr_r1["Phase STD"]
+phase_1_u=lcr_r1["Phase STD"]*0.1
 plt.scatter(freq_1,phase_1,label="Data",color="blue")
 fit1,cov1=curve_fit(phase_r,freq_1,phase_1,sigma=1/phase_1_u,p0=[16394,16394,-1.5,1000,1,1],maxfev=10000)
 fit_eq1=phase_r(freq_1,fit1[0],fit1[1],fit1[2],fit1[3],fit1[4],fit1[5])  #This creates an arctan fit to the phase data 
@@ -74,10 +75,11 @@ print(np.diag(cov2))
 
 freq_2=lcr_r2["Frequency (Hz)"]*2*np.pi*0.001
 amp_2=lcr_r2["Amplitude (mV)"]*0.001
-amp_2_u=lcr_r2["Amplitude STD"]                     #Assigns each useful column to different variables
+amp_2_u=lcr_r2["Amplitude STD"]*0.1                 #Assigns each useful column to different variables
 phase_2=-lcr_r2["Phase (degrees)"]*((np.pi)/180)   #Degrees is converted to radians
 phase_2_u=lcr_r2["Phase STD"]
 plt.scatter(freq_2,phase_2,label="Data",color="blue")
+plt.errorbar(freq_2,phase_2,yerr=phase_2_u,fmt="none",capsize=3)
 fit3,cov3=curve_fit(phase_r,freq_2,phase_2,sigma=1/phase_2_u,p0=[16394,16394,-1.5,1000,1,1],maxfev=10000)
 fit_eq3=phase_r(freq_2,fit3[0],fit3[1],fit3[2],fit3[3],fit3[4],fit3[5])  #This creates an arctan fit to the phase data 
 plt.plot(freq_2,fit_eq3,label="Fit",color="blue")
@@ -109,9 +111,9 @@ print(np.diag(cov4))
 
 freq_3=lcr_r3["Frequency (Hz)"]*2*np.pi*0.001
 amp_3=lcr_r3["Amplitude (mV)"]*0.001
-amp_3_u=lcr_r3["STD Amplitude"]                     #Assigns each useful column to different variables
+amp_3_u=lcr_r3["STD Amplitude"]*0.1                    #Assigns each useful column to different variables
 phase_3=-lcr_r3["Phase (degrees)"]*((np.pi)/180)   #Degrees is converted to radians
-phase_3_u=lcr_r3["STD Phase"]
+phase_3_u=lcr_r3["STD Phase"]*0.1
 plt.scatter(freq_3,phase_3,label="Data",color="blue")
 fit5,cov5=curve_fit(phase_r,freq_3,phase_3,sigma=1/phase_3_u,p0=[16394,16394,-1.5,3000,1,1],maxfev=10000)
 fit_eq5=phase_r(freq_3,fit5[0],fit5[1],fit5[2],fit5[3],fit5[4],fit5[5])  #This creates an arctan fit to the phase data 
@@ -149,6 +151,7 @@ def res_r(f,w,R,r,y,V,d):
 v_in=lcr_r3["Input (mV)"]*0.001
 v_in_u=lcr_r3["STD Input "]
 plt.scatter(freq_3,v_in,label="Data",color="blue")
+plt.errorbar(freq_3,v_in,yerr=v_in_u*0.01,fmt="none",capsize=3)
 fit7,cov7=curve_fit(res_r,freq_3,v_in,sigma=1/v_in_u,p0=[103,3,1,300,1.91,0.08])
 fit_eq7=res_r(freq_3,fit7[0],fit7[1],fit7[2],fit7[3],fit7[4],fit7[5])
 plt.plot(freq_3,fit_eq7,color="blue",label="Fit")
@@ -169,15 +172,17 @@ int_r_u=np.sqrt(cov2[2][2]+cov4[2][2]+cov6[2][2])
 res_f=[fit2[0],fit4[0],fit6[0],fit7[0]]
 res_f_u=np.sqrt(cov2[0][0]+cov4[0][0]+cov6[0][0])
 #%%
-plt.scatter(freq_1,phase_1,label="1 Ohm",color="blue")
+plt.errorbar(freq_1,phase_1,label="1 Ohm",color="blue",yerr=phase_1_u,fmt="none")
 fit1,cov1=curve_fit(phase_r,freq_1,phase_1,sigma=1/phase_1_u,p0=[16394,16394,-1.5,1000,1,1],maxfev=10000)
 fit_eq1=phase_r(freq_1,fit1[0],fit1[1],fit1[2],fit1[3],fit1[4],fit1[5])  #This creates an arctan fit to the phase data 
 plt.plot(freq_1,fit_eq1,label="1 Ohm Fit",color="blue")
-plt.scatter(freq_2,phase_2,label="2 Ohm",color="red")
+
+plt.errorbar(freq_2,phase_2,label="2 Ohm",color="red",yerr=phase_2_u,fmt="none")
 fit3,cov3=curve_fit(phase_r,freq_2,phase_2,sigma=1/phase_2_u,p0=[16394,16394,-1.5,1000,1,1],maxfev=10000)
 fit_eq3=phase_r(freq_2,fit3[0],fit3[1],fit3[2],fit3[3],fit3[4],fit3[5])  #This creates an arctan fit to the phase data 
 plt.plot(freq_2,fit_eq3,label="2 Ohm Fit",color="red")
 plt.scatter(freq_3,phase_3,label="3 Ohm",color="purple")
+
 fit5,cov5=curve_fit(phase_r,freq_3,phase_3,sigma=1/phase_3_u,p0=[16394,16394,-1.5,3000,1,1],maxfev=10000)
 fit_eq5=phase_r(freq_3,fit5[0],fit5[1],fit5[2],fit5[3],fit5[4],fit5[5])  #This creates an arctan fit to the phase data 
 plt.plot(freq_3,fit_eq5,label="3 Ohm Fit",color="purple")
@@ -189,14 +194,17 @@ plt.legend()
 plt.show()
 
 plt.scatter(freq_1,amp_1,label="1 Ohm",color="blue",s=10)
+plt.errorbar(freq_1,amp_1,yerr=amp_1_u,fmt="none",capsize=3)
 fit2,cov2=curve_fit(resonance_r,freq_1,amp_1,sigma=1/amp_1_u,p0=[100,10,5])
 fit_eq2=resonance_r(freq_1,fit2[0],fit2[1],fit2[2])
 plt.plot(freq_1,fit_eq2,label="1 Ohm Fit",color="blue")
 plt.scatter(freq_2,amp_2,label="2 Ohm",color="purple",s=10)
+plt.errorbar(freq_2,amp_2,yerr=amp_2_u,fmt="none",capsize=3)
 fit4,cov4=curve_fit(resonance_r,freq_2,amp_2,sigma=1/amp_2_u,p0=[103,10,2],maxfev=1000)
 fit_eq4=resonance_r(freq_2,fit4[0],fit4[1],fit4[2])
 plt.plot(freq_2,fit_eq4,label="2 Ohm Fit",color="purple")
 plt.scatter(freq_3,amp_3,label="3 Ohm",color="brown",s=10)
+plt.errorbar(freq_3,amp_3,yerr=amp_3_u,fmt="none",capsize=3)
 fit6,cov6=curve_fit(resonance_r,freq_3,amp_3,sigma=1/amp_3_u,p0=[103,10,1],maxfev=1000)
 fit_eq6=resonance_r(freq_3,fit6[0],fit6[1],fit6[2])
 plt.plot(freq_3,fit_eq6,label="3 Ohm Fit",color="brown")
@@ -205,7 +213,7 @@ plt.xlabel("Frequency (kHz)")
 plt.ylabel("Amplitude (V)")
 plt.legend()
 plt.grid() 
-
+ #%%
 frequency=np.linspace(60,130,1000000)
 max_1=resonance_r(res_f[0],fit2[0],fit2[1],fit2[2])
 max_2=resonance_r(res_f[1],fit4[0],fit4[1],fit4[2])
